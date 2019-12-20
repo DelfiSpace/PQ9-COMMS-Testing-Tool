@@ -31,8 +31,8 @@ class ByteWriter:
         #  Socket to talk to server
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUSH)
-        print("ByteWriter: Binding to port 5556")
-        self.socket.bind("tcp://*:5556")
+        print("ByteWriter: Binding to port 5600")
+        self.socket.bind("tcp://*:5600")
 
     def writeBytes(self, intList):
         packet = 50*[int("0xAA", 16)]

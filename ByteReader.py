@@ -31,8 +31,8 @@ class ByteReader:
         #  Socket to talk to server
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PULL)
-        print("Connecting to port 5555")
-        self.socket.connect("tcp://127.0.0.1:5555")
+        print("Connecting to port 5500")
+        self.socket.connect("tcp://127.0.0.1:5500")
 
     def GetBits(self):
         try:

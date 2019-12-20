@@ -1,5 +1,6 @@
 import collections
 import ByteReader
+import NRZI_G3RUH_Encoder
 
 def byte2bits(n):
     out = list([])
@@ -29,6 +30,7 @@ rx_state = 0
 #0 : Waiting for Flag;
 #1 : receiving, waiting for flag or >max_size
 bread = ByteReader.ByteReader()
+ax25encoder = NRZI_G3RUH_Encoder.AX25Encoder()
 
 while True:
     #  Wait for next request from client
@@ -36,7 +38,8 @@ while True:
     #print(''.join('{:02x} '.format(x) for x in message))
     #  Add received bytes to bitBuffer
     if(rcvd):
-        for inbit in inbits:
+        for inbit_raw in inbits:
+            inbit = ax25encoder.DescrambleBit(ax25encoder.NRZIDecodeBit(inbit_raw))
             if rx_state == 0:
                 flagbuffer.append(inbit)
                 if(bits2byte(list(flagbuffer)[0:8]) == int("0xEB", 16) and bits2byte(list(flagbuffer)[8:16]) == int("0x90", 16) and bits2byte(list(flagbuffer)[16:24]) == int("0x88", 16)):
