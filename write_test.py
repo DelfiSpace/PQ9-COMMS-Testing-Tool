@@ -1,6 +1,15 @@
 import ByteWriter
 import collections
 import NRZI_G3RUH_Encoder
+import AX25_Encoder
+
+def flipbyte(x):
+    return int((format(x,"08b")[::-1]),2)
+
+def flipbytes(n):
+    out = list([])
+    out.extend(int((format(x,"08b")[::-1]),2) for x in n)
+    return out
 
 def byte2bits(n):
     out = list([])
@@ -24,18 +33,18 @@ def bits2bytes(n):
     return out
 
 bwrite = ByteWriter.ByteWriter()
-ax25encoder = NRZI_G3RUH_Encoder.AX25Encoder()
+g3ruhEncoder = NRZI_G3RUH_Encoder.AX25Encoder()
+ax25Encoder = AX25_Encoder.AX25Encoder()
 
-pilot_seq = 3*[int("0x7E", 16), int("0x7E", 16)]
-start_seq = [int("0xEB", 16), int("0x90", 16), int("0x88", 16)]
-tail_seq = [int("0x7E", 16), int("0x7E", 16)]
-data = 3*[int("0xCA", 16), int("0x59", 16), int("0xE4", 16)]
+pilot_seq = list2bits(3*[int("0x7E", 16), int("0x7E", 16)])
+tail_seq = list2bits([int("0x7E", 16), int("0x7E", 16)])
+data = list2bits(flipbytes([int("0x82", 16), int("0x98", 16),int("0x98", 16), int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0xE0", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x61", 16), int("0x03", 16), int("0xF0", 16), int("0xFF", 16),int("0xFF", 16),int("0x54", 16),int("0x05", 16)]))
 
-txBytes = pilot_seq + start_seq + data + tail_seq
+txBits = pilot_seq + ax25Encoder.StuffBits(data) + tail_seq
 
-txBits_raw = list2bits(txBytes)
+txBits_raw = txBits
 #txBits = [ax25encoder.NRZIEncodeBit(ax25encoder.ScrambleBit(x)) for x in txBits_raw]
-txBits = [ax25encoder.NRZIEncodeBit(ax25encoder.ScrambleBit(x)) for x in txBits_raw]
+txBits = [g3ruhEncoder.NRZIEncodeBit(g3ruhEncoder.ScrambleBit(x)) for x in txBits_raw]
 txBytes = bits2bytes(txBits)
 
 bwrite.writeBytes(txBytes)

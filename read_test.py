@@ -1,6 +1,15 @@
 import collections
 import ByteReader
 import NRZI_G3RUH_Encoder
+import AX25_Encoder
+
+def flipbyte(x):
+    return int((format(x,"08b")[::-1]),2)
+
+def flipbytes(n):
+    out = list([])
+    out.extend(int((format(x,"08b")[::-1]),2) for x in n)
+    return out
 
 def byte2bits(n):
     out = list([])
@@ -30,7 +39,8 @@ rx_state = 0
 #0 : Waiting for Flag;
 #1 : receiving, waiting for flag or >max_size
 bread = ByteReader.ByteReader()
-ax25encoder = NRZI_G3RUH_Encoder.AX25Encoder()
+g3ruhEncoder = NRZI_G3RUH_Encoder.AX25Encoder()
+ax25Encoder = AX25_Encoder.AX25Encoder()
 
 while True:
     #  Wait for next request from client
@@ -39,19 +49,25 @@ while True:
     #  Add received bytes to bitBuffer
     if(rcvd):
         for inbit_raw in inbits:
-            inbit = ax25encoder.DescrambleBit(ax25encoder.NRZIDecodeBit(inbit_raw))
+            inbit = g3ruhEncoder.DescrambleBit(g3ruhEncoder.NRZIDecodeBit(inbit_raw))
             if rx_state == 0:
                 flagbuffer.append(inbit)
-                if(bits2byte(list(flagbuffer)[0:8]) == int("0xEB", 16) and bits2byte(list(flagbuffer)[8:16]) == int("0x90", 16) and bits2byte(list(flagbuffer)[16:24]) == int("0x88", 16)):
+                if(bits2byte(list(flagbuffer)[0:8]) == int("0x7E", 16) and bits2byte(list(flagbuffer)[8:16]) == int("0x7E", 16) and bits2byte(list(flagbuffer)[16:24]) != int("0x7E", 16)):
                     rx_state = 1
-                    print("AX25 FLAG DETECTED")
+                    #print("AX25 FLAG DETECTED  |  FirstByte", end="")
+                    #print(''.join('{:02X} '.format(bits2byte(list(flagbuffer)[16:24]))))
+                    messagebuffer = list(flagbuffer)[16:24]
+                    bitcount = 8
             elif rx_state == 1:
-                messagebuffer[bitcount] = inbit
+                messagebuffer.append(inbit)
                 bitcount += 1
                 if(bitcount >= 8):
                     if(bits2byte(list(messagebuffer[bitcount-8:bitcount-1])) == int("0x7E", 16)):
-                        print("END SEQ, LEN: %2d | MSG: " % int((bitcount-8)/8), end="")
-                        print(''.join('{:02X} '.format(x) for x in bits2bytes(messagebuffer[:bitcount-9])))
+                        messagebuffer = messagebuffer[:len(messagebuffer)-8]
+                        messagebuffer = ax25Encoder.DeStuffBits(messagebuffer)
+                        if (len(messagebuffer)-1) % 8 == 0:
+                            print("END SEQ, LEN: %2d | MSG: " % int((len(messagebuffer)-1)/8), end="")
+                            print(''.join('{:02X} '.format(flipbyte(x)) for x in bits2bytes(messagebuffer[:bitcount-9])))
                         bitcount = 0
                         rx_state = 0
                 if(bitcount >= (18+10)*8):

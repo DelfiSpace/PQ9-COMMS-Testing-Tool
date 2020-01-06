@@ -3836,7 +3836,7 @@
     <key>zeromq_pull_source</key>
     <param>
       <key>address</key>
-      <value>tcp://127.0.0.1:5556</value>
+      <value>tcp://127.0.0.1:5600</value>
     </param>
     <param>
       <key>alias</key>
@@ -3899,7 +3899,7 @@
     <key>zeromq_push_sink</key>
     <param>
       <key>address</key>
-      <value>tcp://*:5555</value>
+      <value>tcp://*:5500</value>
     </param>
     <param>
       <key>alias</key>
