@@ -70,7 +70,7 @@ while True:
                             print(''.join('{:02X} '.format(flipbyte(x)) for x in bits2bytes(messagebuffer[:bitcount-9])))
                         bitcount = 0
                         rx_state = 0
-                if(bitcount >= (18+10)*8):
+                if(bitcount >= (18+100)*8):
                     bitcount = 0
                     rx_state = 0
             #print(bitbuffer)

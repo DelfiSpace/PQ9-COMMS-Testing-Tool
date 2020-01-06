@@ -40,3 +40,23 @@ class AX25Encoder:
                 counter = 0
 
         return outputBits
+
+    def CalculateFCS(self, bytes):
+        guard = False
+        FCSBuff = int("0xFFFF",16)
+        for byte in bytes:
+            for i in range(0,8):
+                guard = (FCSBuff & 1) != 0
+                FCSBuff = FCSBuff >> 1
+                FCSBuff = FCSBuff & int("0x7FFF", 16)
+                bitHigh = (byte & (1 << i)) != 0
+                if bitHigh != guard:
+                    FCSBuff = FCSBuff ^ int("0x8408", 16)
+        
+        FCSBuff = FCSBuff ^ int("0xFFFF", 16)
+        FCSByte1 = (FCSBuff & int("0x00FF",16))
+        FCSByte2 = ((FCSBuff & int("0xFF00",16)) >> 8)
+
+        return [FCSByte1, FCSByte2]
+
+        
