@@ -10,7 +10,7 @@ class APDetector:
         super().__init__()
         self.state = 0
         self.state = 0
-        self.flagbuffer = collections.deque(24*[0],maxlen = 24)
+        self.flagbuffer = collections.deque(8*8*[0],maxlen = 8*8)
         self.msgBuffer = []
         self.bitCount = 0
         self.LDPCdecoder = LDPC_decoder.decoder(LDPC_generator_CCSDS_256.H)
@@ -19,7 +19,7 @@ class APDetector:
         if self.state == 0:
             ##Detect Flag
             self.flagbuffer.append(bit)
-            if compareBytes(bits2bytes(list(self.flagbuffer)), [int("0x7E", 16), int("0xEB", 16), int("0x90", 16)]) <= 1:
+            if compareBytes(bits2bytes(list(self.flagbuffer)), [int("0x00", 16), int("0x00", 16), int("0xEB", 16), int("0x90", 16),int("0x00", 16), int("0x00", 16), int("0xEB", 16), int("0x90", 16)]) <= 1:
                 print("FLAG DETECTED")
                 self.msgBuffer = []
                 self.state = 2
@@ -28,8 +28,15 @@ class APDetector:
             self.msgBuffer.append(bit)
             self.bitCount = self.bitCount + 1
             #print(self.bitCount)
-            if self.bitCount >= 8*64:
-                ## pilot received!
+            if self.bitCount == 8*8:
+                ## Check for Tail Sequence
+                if compareBytes(bits2bytes(list(self.msgBuffer[:64])), [int("0xFF", 16), int("0xFF", 16), int("0xEB", 16), int("0x90", 16),int("0xFF", 16), int("0xFF", 16), int("0xEB", 16), int("0x90", 16)]) <= 1:
+                    print("TAIL DETECTED!")
+                    self.msgBuffer = []
+                    self.bitCount = 0
+                    self.state = 0
+            elif self.bitCount == 8*64:
+                ## Get CLTU
                 decoded = False
                 ##decode pilot:
                 for k in range(0,20):
@@ -43,6 +50,11 @@ class APDetector:
                     print(''.join('{:02X} '.format(x) for x in receivedBytes))
                 else:
                     print("PILOT FAILED TO DECODE")
+                self.msgBuffer = []
+                self.bitCount = 0
+            elif self.bitCount > 8*64: 
+                print("ERROR: SHOULD NEVER HAPPEN!")
+                print(self.bitCount)
                 self.msgBuffer = []
                 self.bitCount = 0
                 self.state = 0
