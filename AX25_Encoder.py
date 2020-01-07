@@ -2,16 +2,8 @@
 
 class AX25Encoder:
 
-    def __init__(self):
-        super().__init__()
-        self.NRZI_ENCODER = True
-        self.NRZI_DECODER = True
-        self.scrambling_bit = 0
-        self.scrambler = 255
-        self.descrambling_bit = 0
-        self.descrambler = 0
-
-    def StuffBits(self, bits):
+    @staticmethod
+    def StuffBits(bits):
         outputBits = []
         counter = 0
         for bit in bits:
@@ -27,7 +19,8 @@ class AX25Encoder:
 
         return outputBits
         
-    def DeStuffBits(self, bits):
+    @staticmethod
+    def DeStuffBits(bits):
         outputBits = []
         counter = 0
         for bit in bits:
@@ -41,7 +34,8 @@ class AX25Encoder:
 
         return outputBits
 
-    def CalculateFCS(self, bytes):
+    @staticmethod
+    def CalculateFCS(bytes):
         guard = False
         FCSBuff = int("0xFFFF",16)
         for byte in bytes:
@@ -59,4 +53,21 @@ class AX25Encoder:
 
         return [FCSByte1, FCSByte2]
 
+    @staticmethod
+    def CheckFCS(bytes):
+        guard = False
+        FCSBuff = int("0xFFFF",16)
+        for k in range(0,len(bytes)-2):
+            for i in range(0,8):
+                guard = (FCSBuff & 1) != 0
+                FCSBuff = FCSBuff >> 1
+                FCSBuff = FCSBuff & int("0x7FFF", 16)
+                bitHigh = (bytes[k] & (1 << i)) != 0
+                if bitHigh != guard:
+                    FCSBuff = FCSBuff ^ int("0x8408", 16)
         
+        FCSBuff = FCSBuff ^ int("0xFFFF", 16)
+        FCSByte1 = (FCSBuff & int("0x00FF",16))
+        FCSByte2 = ((FCSBuff & int("0xFF00",16)) >> 8)
+
+        return (FCSByte1 == bytes[-2] and FCSByte2 == bytes[-1])

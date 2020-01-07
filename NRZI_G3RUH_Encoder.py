@@ -1,6 +1,6 @@
 
 
-class AX25Encoder:
+class G3RUHEncoder:
 
     def __init__(self):
         super().__init__()
