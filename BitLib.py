@@ -27,3 +27,12 @@ def bits2bytes(n):
     for i in range(0,nr_of_bytes):
         out.append(int(bits2byte(n[8*i:8*(i+1)])))
     return out
+
+def compareByte(a, b):
+    return sum(byte2bits(a^b))
+
+def compareBytes(a, b):
+    count = 0
+    for i in range(0,len(a)):
+        count = count + compareByte(a[i],b[i])
+    return count

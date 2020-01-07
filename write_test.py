@@ -12,7 +12,7 @@ pilot_seq = (10*[int("0x7E", 16), int("0x7E", 16)])
 tail_seq = [int("0x7E", 16), int("0x7E", 16)]
 data = [int("0x82", 16), int("0x98", 16),int("0x98", 16), int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0xE0", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x61", 16), int("0x03", 16), int("0xF0", 16), int("0xAA", 16)]
 data.extend(ax25Encoder.CalculateFCS(data))
-txBits = list2bits(pilot_seq) + ax25Encoder.StuffBits(list2bits(flipbytes(data))) + list2bits(tail_seq) + ax25Encoder.StuffBits(list2bits(flipbytes(data))) + list2bits(tail_seq)
+txBits = list2bits(pilot_seq) + ax25Encoder.StuffBits(list2bits(flipbytes(data))) + list2bits(tail_seq)
 
 txBits_raw = txBits
 #txBits = [ax25encoder.NRZIEncodeBit(ax25encoder.ScrambleBit(x)) for x in txBits_raw]

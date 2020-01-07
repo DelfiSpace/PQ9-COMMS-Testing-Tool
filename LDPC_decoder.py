@@ -93,17 +93,18 @@ class decoder:
     def iterateBitFlip(self, v):
         ### Modified Gallager's Bitflip (no Threshold but flip maximum)
         ### Yu Kou,  Low-density parity-check codes based on finite geometries: a rediscovery and new results, 2001
+        v = np.array(v)
         S_n = np.mod(v @ np.transpose(self.H), 2)
         # print(S_n)
         if( np.sum(S_n) == 0):
             return True, v
 
         e_n = S_n @ self.H
-        # print(e_n)
+        #print(e_n)
         idx = np.argwhere(e_n == np.max(e_n))
         v[idx] = np.mod(v[idx]+1, 2)
 
-        return False, v
+        return False, v.tolist()
 
     def iterateWeightedBitFlip(self, v):
         ## Weighted Bit Flipping
