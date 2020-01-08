@@ -14,6 +14,7 @@ class APDetector:
         self.msgBuffer = []
         self.bitCount = 0
         self.LDPCdecoder = LDPC_decoder.decoder(LDPC_generator_CCSDS_256.H)
+        self.packetCount = 0
 
     def queBit(self, bit):
         if self.state == 0:
@@ -30,7 +31,7 @@ class APDetector:
             #print(self.bitCount)
             if self.bitCount == 8*8:
                 ## Check for Tail Sequence
-                if compareBytes(bits2bytes(list(self.msgBuffer[:64])), [int("0xFF", 16), int("0xFF", 16), int("0xEB", 16), int("0x90", 16),int("0xFF", 16), int("0xFF", 16), int("0xEB", 16), int("0x90", 16)]) <= 1:
+                if compareBytes(bits2bytes(list(self.msgBuffer[:16])), [int("0xEB", 16), int("0x90", 16)]) <= 1:
                     print("TAIL DETECTED!")
                     self.msgBuffer = []
                     self.bitCount = 0
@@ -46,7 +47,8 @@ class APDetector:
                         break
                 if decoded:
                     receivedBytes = (bits2bytes(self.msgBuffer))[:32]
-                    print("AP MSG RECEIVED! | ITER: %2d | LEN: %2d | MSG: " % (k, int(len(receivedBytes))), end="")
+                    self.packetCount += 1
+                    print("AP MSG RECEIVED! | NR: %d | ITER: %2d | LEN: %2d | MSG: " % (self.packetCount, k, int(len(receivedBytes))), end="")
                     print(''.join('{:02X} '.format(x) for x in receivedBytes))
                 else:
                     print("PILOT FAILED TO DECODE")

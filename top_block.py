@@ -3,7 +3,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Tue Jan  7 12:50:58 2020
+# Generated: Wed Jan  8 09:41:54 2020
 ##################################################
 
 if __name__ == '__main__':
@@ -83,7 +83,7 @@ class top_block(gr.top_block, Qt.QWidget):
         	),
         )
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
-        self.uhd_usrp_source_0.set_center_freq(435000000, 0)
+        self.uhd_usrp_source_0.set_center_freq(uhd.tune_request(435e6, 5e6), 0)
         self.uhd_usrp_source_0.set_gain(80, 0)
         self.uhd_usrp_source_0.set_antenna('RX2', 0)
         self.uhd_usrp_sink_0_0 = uhd.usrp_sink(
@@ -94,7 +94,7 @@ class top_block(gr.top_block, Qt.QWidget):
         	),
         )
         self.uhd_usrp_sink_0_0.set_samp_rate(samp_rate)
-        self.uhd_usrp_sink_0_0.set_center_freq(435000000, 0)
+        self.uhd_usrp_sink_0_0.set_center_freq(uhd.tune_request(435e6, 5e6), 0)
         self.uhd_usrp_sink_0_0.set_gain(80, 0)
         self.uhd_usrp_sink_0_0.set_antenna('TX/RX', 0)
         self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(

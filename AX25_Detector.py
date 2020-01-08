@@ -11,6 +11,7 @@ class AX25Detector:
         self.flagbuffer = collections.deque(maxlen = 8)
         self.msgBuffer = []
         self.bitCount = 0
+        self.packetCount = 0
 
     def queBit(self, bit):
         if self.state == 0:
@@ -46,7 +47,8 @@ class AX25Detector:
                 if len(self.msgBuffer)%8 == 0 and len(self.msgBuffer) > 18*8:
                     receivedBytes = flipbytes(bits2bytes(self.msgBuffer))
                     if (AX25_Encoder.AX25Encoder.CheckFCS(receivedBytes)):
-                        print("AX25 MSG RECEIVED! | LEN: %2d | MSG: " % int(len(receivedBytes)), end="")
+                        self.packetCount += 1
+                        print("AX25 MSG RECEIVED! | NR: %s | LEN: %2d | MSG: " % (self.packetCount, int(len(receivedBytes))), end="")
                         print(''.join('{:02X} '.format(x) for x in receivedBytes))
                 self.msgBuffer = []
                 self.bitCount = 0
