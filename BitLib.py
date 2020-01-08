@@ -36,3 +36,11 @@ def compareBytes(a, b):
     for i in range(0,len(a)):
         count = count + compareByte(a[i],b[i])
     return count
+
+def soft2hardBits(bits):
+    out = bits
+    out[out >= 0] = 1
+    out[out < 0] = 0
+
+def soft2hardBit(bit):
+    return 1 if bit >= 0 else 0

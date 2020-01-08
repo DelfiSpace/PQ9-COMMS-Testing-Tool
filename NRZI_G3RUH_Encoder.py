@@ -1,4 +1,4 @@
-
+from BitLib import *
 
 class G3RUHEncoder:
 
@@ -35,3 +35,19 @@ class G3RUHEncoder:
         tmp = self.NRZI_DECODER
         self.NRZI_DECODER = isHigh
         return 0 if (isHigh != tmp) else 1
+
+    def SaveState(self):
+        self.NRZI_ENCODER_bak = self.NRZI_ENCODER
+        self.NRZI_DECODER_bak = self.NRZI_DECODER
+        self.scrambling_bit_bak = self.scrambling_bit
+        self.scrambler_bak = self.scrambler
+        self.descrambling_bit_bak = self.descrambling_bit
+        self.descrambler_bak = self.descrambler
+
+    def LoadState(self):
+        self.NRZI_ENCODER = self.NRZI_ENCODER_bak
+        self.NRZI_DECODER = self.NRZI_DECODER_bak
+        self.scrambling_bit = self.scrambling_bit_bak
+        self.scrambler = self.scrambler_bak
+        self.descrambling_bit = self.descrambling_bit_bak
+        self.descrambler = self.descrambler_bak
