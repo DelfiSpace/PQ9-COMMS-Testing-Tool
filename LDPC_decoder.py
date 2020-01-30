@@ -1,6 +1,5 @@
 import sys
 import numpy as np
-import numba
 np.set_printoptions(threshold=sys.maxsize, linewidth=sys.maxsize)
 
 class decoder:

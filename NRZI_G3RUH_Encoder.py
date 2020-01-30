@@ -35,3 +35,31 @@ class G3RUHEncoder:
         tmp = self.NRZI_DECODER
         self.NRZI_DECODER = isHigh
         return 0 if (isHigh != tmp) else 1
+
+    def Spinup(self):
+        self.NRZI_ENCODER = True
+        self.NRZI_DECODER = True
+        self.scrambling_bit = 0
+        self.scrambler = 255
+        self.descrambling_bit = 0
+        self.descrambler = 0
+
+        pilot_seq = 20*[int("0x7E", 16)]
+        pilot_seq_bits = list2bits(pilot_seq)
+        txBits = [self.NRZIEncodeBit(self.ScrambleBit(x)) for x in pilot_seq_bits]
+
+    def SaveState(self):
+        self.NRZI_ENCODER_bak = self.NRZI_ENCODER
+        self.NRZI_DECODER_bak = self.NRZI_DECODER
+        self.scrambling_bit_bak = self.scrambling_bit
+        self.scrambler_bak = self.scrambler
+        self.descrambling_bit_bak = self.descrambling_bit
+        self.descrambler_bak = self.descrambler
+
+    def LoadState(self):
+        self.NRZI_ENCODER = self.NRZI_ENCODER_bak
+        self.NRZI_DECODER = self.NRZI_DECODER_bak
+        self.scrambling_bit = self.scrambling_bit_bak
+        self.scrambler = self.scrambler_bak
+        self.descrambling_bit = self.descrambling_bit_bak
+        self.descrambler = self.descrambler_bak
