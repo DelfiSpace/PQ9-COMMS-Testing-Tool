@@ -9,6 +9,7 @@ from BitLib import *
 import sys
 import ByteReader
 import AX25_Detector
+from serial import Serial
 
 def byteSender(queue):
     writeQ = queue
@@ -54,8 +55,10 @@ def byteReceiver(queue):
                     readQ.put(msg)
 
 def msgHandler(cmdQ, writeQ):
+    serPort = Serial('/dev/ttyACM0', timeout=10)
+    print("Connected to Serial: "+serPort.name)
     ax25Encoder = AX25_Encoder.AX25Encoder()
-    pilot_seq = (2*[int("0x7E", 16), int("0x7E", 16)])
+    pilot_seq = (1*[int("0x7E", 16), int("0x7E", 16)])
     tail_seq = 1*[int("0x7E", 16), int("0x7E", 16)]
     data_init = [int("0x88", 16), int("0x98", 16),int("0x98", 16), int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0xE0", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x61", 16), int("0x03", 16), int("0xF0", 16)]
     ax25Encoder = AX25_Encoder.AX25Encoder()
@@ -95,17 +98,26 @@ def msgHandler(cmdQ, writeQ):
                     command = data_init + data
                 command.extend(ax25Encoder.CalculateFCS(command))
                 txBits += ax25Encoder.StuffBits(list2bits(flipbytes(command))) + list2bits(tail_seq)
-                print("Line number: " + str(i)+"  : ", end="")
-                print(''.join('{:02X} '.format(x) for x in command))
+                #print("Line number: " + str(i)+"  : ", end="")
+                #print(''.join('{:02X} '.format(x) for x in command))
 
             #txBits += list2bits(pilot_seq)
             txBytes = bits2bytes(txBits)
             #writeQ.put(txBytes)
-            print("Buffering: ", end="")
-            print(''.join('{:02X} '.format(x) for x in txBytes))
+            #print("Buffering: ", end="")
+            #print(''.join('{:02X} '.format(x) for x in txBytes))
             writeQ.put(txBytes)
             #for byte in txBytes:
             #    writeQ.put([byte])
+            reply = False
+            START = time.time()
+            while reply == False:
+                test = serPort.readline()
+                if( test == b'!\r\n'):
+                    reply = True
+                if(time.time()-START > 10):
+                    break
+            print(time.time()-START)
 
 
 if __name__ == "__main__":

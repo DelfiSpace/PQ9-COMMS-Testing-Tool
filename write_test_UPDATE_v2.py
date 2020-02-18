@@ -18,7 +18,7 @@ g3ruhEncoder = NRZI_G3RUH_Encoder.G3RUHEncoder()
 ax25Encoder = AX25_Encoder.AX25Encoder()
 
 pilot_seq = (17*[int("0x7E", 16), int("0x7E", 16)])
-tail_seq = 1*[int("0x7E", 16), int("0x7E", 16)]
+tail_seq = 2*[int("0x7E", 16), int("0x7E", 16)]
 data_init = [int("0x88", 16), int("0x98", 16),int("0x98", 16), int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0xE0", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x61", 16), int("0x03", 16), int("0xF0", 16)]
 
 txBits = list2bits(pilot_seq)

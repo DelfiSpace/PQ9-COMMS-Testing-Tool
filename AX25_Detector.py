@@ -47,8 +47,8 @@ class AX25Detector:
                 if len(self.msgBuffer)%8 == 0 and len(self.msgBuffer) > 18*8:
                     receivedBytes = flipbytes(bits2bytes(self.msgBuffer))
                     if (AX25_Encoder.AX25Encoder.CheckFCS(receivedBytes)):
-                        print("AX25 MSG RECEIVED! | NR: %s | LEN: %2d | MSG: " % (self.packetCount, int(len(receivedBytes))), end="")
-                        print(''.join('{:02X} '.format(x) for x in receivedBytes))
+                        #print("AX25 MSG RECEIVED! | NR: %s | LEN: %2d | MSG: " % (self.packetCount, int(len(receivedBytes))), end="")
+                        #print(''.join('{:02X} '.format(x) for x in receivedBytes))
                         self.packetCount += 1
                         return True
                 self.msgBuffer = []
@@ -96,8 +96,8 @@ class AX25Detector:
                 if len(self.msgBuffer)%8 == 0 and len(self.msgBuffer) > 18*8:
                     receivedBytes = flipbytes(bits2bytes(self.msgBuffer))
                     if (AX25_Encoder.AX25Encoder.CheckFCS(receivedBytes)):
-                        print("AX25 MSG RECEIVED! | NR: %s | LEN: %2d | MSG: " % (self.packetCount, int(len(receivedBytes))), end="")
-                        print(''.join('{:02X} '.format(x) for x in receivedBytes))
+                        #print("AX25 MSG RECEIVED! | NR: %s | LEN: %2d | MSG: " % (self.packetCount, int(len(receivedBytes))), end="")
+                        #print(''.join('{:02X} '.format(x) for x in receivedBytes))
                         self.packetCount += 1
                         return True, receivedBytes
                 self.msgBuffer = []

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 #
@@ -82,7 +82,7 @@ class top_block(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
-        self.zeromq_req_source_0 = zeromq.req_source(gr.sizeof_char, 1, 'tcp://127.0.0.1:5600', 100, False, 1)
+        self.zeromq_req_source_0 = zeromq.req_source(gr.sizeof_char, 1, 'tcp://127.0.0.1:5600', 100, False, -1, 5)
         self.zeromq_push_sink_0 = zeromq.push_sink(gr.sizeof_char, 1, 'tcp://*:5500', 100, False, -1)
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("type=b200", "")),
@@ -90,7 +90,7 @@ class top_block(gr.top_block, Qt.QWidget):
                 cpu_format="fc32",
                 otw_format="sc16",
                 args='',
-                channels=[],
+                channels=list(range(0,1)),
             ),
         )
         self.uhd_usrp_source_0.set_center_freq(uhd.tune_request(435e6, 5e6), 0)
@@ -103,7 +103,7 @@ class top_block(gr.top_block, Qt.QWidget):
             uhd.stream_args(
                 cpu_format="fc32",
                 args='',
-                channels=[],
+                channels=list(range(0,1)),
             ),
             '',
         )
@@ -114,9 +114,59 @@ class top_block(gr.top_block, Qt.QWidget):
         self.uhd_usrp_sink_0_0.set_time_unknown_pps(uhd.time_spec())
         self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(
                 interpolation=1,
-                decimation=rx_dec,
+                decimation=int(rx_dec),
                 taps=None,
                 fractional_bw=None)
+        self.qtgui_time_sink_x_0_0_0 = qtgui.time_sink_c(
+            1024, #size
+            samp_rate, #samp_rate
+            "", #name
+            1 #number of inputs
+        )
+        self.qtgui_time_sink_x_0_0_0.set_update_time(0.10)
+        self.qtgui_time_sink_x_0_0_0.set_y_axis(0, 1)
+
+        self.qtgui_time_sink_x_0_0_0.set_y_label('Amplitude', "")
+
+        self.qtgui_time_sink_x_0_0_0.enable_tags(True)
+        self.qtgui_time_sink_x_0_0_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_0_0_0.enable_autoscale(True)
+        self.qtgui_time_sink_x_0_0_0.enable_grid(False)
+        self.qtgui_time_sink_x_0_0_0.enable_axis_labels(True)
+        self.qtgui_time_sink_x_0_0_0.enable_control_panel(False)
+        self.qtgui_time_sink_x_0_0_0.enable_stem_plot(True)
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(2):
+            if len(labels[i]) == 0:
+                if (i % 2 == 0):
+                    self.qtgui_time_sink_x_0_0_0.set_line_label(i, "Re{{Data {0}}}".format(i/2))
+                else:
+                    self.qtgui_time_sink_x_0_0_0.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+            else:
+                self.qtgui_time_sink_x_0_0_0.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_0_0_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_0_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0_0.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_time_sink_x_0_0_0_win)
         self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
             1024, #size
             samp_rate, #samp_rate
@@ -261,7 +311,7 @@ class top_block(gr.top_block, Qt.QWidget):
                 firdes.WIN_HAMMING,
                 6.76))
         self.digital_gmsk_demod_0 = digital.gmsk_demod(
-            samples_per_symbol=sps/rx_dec,
+            samples_per_symbol=int(sps/rx_dec),
             gain_mu=0.175,
             mu=0.5,
             omega_relative_limit=0.005,
@@ -283,10 +333,12 @@ class top_block(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.uhd_usrp_sink_0_0, 'token_out'), (self.zeromq_req_source_0, 'token_in'))
         self.connect((self.blocks_repack_bits_bb_0, 0), (self.zeromq_push_sink_0, 0))
         self.connect((self.blocks_uchar_to_float_0, 0), (self.qtgui_time_sink_x_0_0, 0))
         self.connect((self.blocks_uchar_to_float_0_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.blocks_unpack_k_bits_bb_0, 0), (self.blocks_uchar_to_float_0, 0))
+        self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_time_sink_x_0_0_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.uhd_usrp_sink_0_0, 0))
         self.connect((self.digital_gmsk_demod_0, 0), (self.blocks_repack_bits_bb_0, 0))
         self.connect((self.digital_gmsk_demod_0, 0), (self.blocks_uchar_to_float_0_0, 0))
@@ -327,6 +379,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_0_0.set_samp_rate(self.samp_rate)
+        self.qtgui_time_sink_x_0_0_0.set_samp_rate(self.samp_rate)
         self.uhd_usrp_sink_0_0.set_samp_rate(self.samp_rate)
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
@@ -347,7 +400,7 @@ def main(top_block_cls=top_block, options=None):
     qapp = Qt.QApplication(sys.argv)
 
     tb = top_block_cls()
-    tb.start(100)
+    tb.start()
     tb.show()
 
     def sig_handler(sig=None, frame=None):
