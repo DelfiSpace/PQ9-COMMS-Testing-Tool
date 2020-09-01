@@ -99,6 +99,9 @@ class AX25Detector:
                         #print("AX25 MSG RECEIVED! | NR: %s | LEN: %2d | MSG: " % (self.packetCount, int(len(receivedBytes))), end="")
                         #print(''.join('{:02X} '.format(x) for x in receivedBytes))
                         self.packetCount += 1
+                        self.msgBuffer = []
+                        self.bitCount = 0
+                        self.state = 0
                         return True, receivedBytes
                 self.msgBuffer = []
                 self.bitCount = 0
