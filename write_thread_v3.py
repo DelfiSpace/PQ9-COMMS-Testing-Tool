@@ -47,9 +47,8 @@ def byteSender(queue):
             #print("Qued up!!!!")
             txBytes = writeQ.get()
             txBits = list2bits(txBytes)
-            #TODO: Complete sequence
-            print("%02X"%idle_seq[0])
-            print(completeIdle(idle_seq[0]))
+            # print("%02X"%idle_seq[0])
+            # print(completeIdle(idle_seq[0]))
             txBits = completeIdle(idle_seq[0]) + txBits
             idle_seq = [(txBytes[-1])]
             txBytes = bits2bytes(txBits)
@@ -75,8 +74,8 @@ def byteReceiver(queue):
                 inbit = g3ruhEncoder.DescrambleBit(g3ruhEncoder.NRZIDecodeBit(inbit_raw))
                 rcflag, msg = ax25Detector.queBitwReturn(inbit)
                 if(rcflag):
-                    #print("AX25 MSG RECEIVED! MSG: ", end="")
-                    #print(''.join('{:02X} '.format(x) for x in msg))
+                    print("AX25 MSG RECEIVED! MSG: ", end="")
+                    print(''.join('{:02X} '.format(x) for x in msg))
                     print("!RX: " + str(num) )
                     num+=1
                     readQ.put(msg)
@@ -85,8 +84,6 @@ def msgHandler(cmdQ, writeQ):
     #serPort = Serial('/dev/ttyACM0', timeout=10)
     #print("Connected to Serial: "+serPort.name)
     ax25Encoder = AX25_Encoder.AX25Encoder()
-    pilot_seq = (0*[int("0x7E", 16), int("0x7E", 16)])
-    tail_seq = 1*[int("0x7E", 16), int("0x7E", 16)]
     data_init = [int("0x88", 16), int("0x98", 16),int("0x98", 16), int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0xE0", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x40", 16),int("0x61", 16), int("0x03", 16), int("0xF0", 16)]
     ax25Encoder = AX25_Encoder.AX25Encoder()
 
@@ -160,6 +157,7 @@ if __name__ == "__main__":
 
     while True:
         txt = input()
+        print("Transmit Test.pq9!")
         cmdQue.put(txt)
 
     for w in workers:
