@@ -41,7 +41,19 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 132]
+    coordinate: [14, 131]
+    rotation: 0
+    state: enabled
+- name: bit_rate_tx
+  id: variable
+  parameters:
+    comment: ''
+    value: '3600'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [98, 136]
     rotation: 0
     state: enabled
 - name: rx_dec
@@ -66,6 +78,18 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [8, 68]
+    rotation: 0
+    state: enabled
+- name: samp_rate_tx
+  id: variable
+  parameters:
+    comment: ''
+    value: sps*bit_rate_tx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [110, 77]
     rotation: 0
     state: enabled
 - name: sps
@@ -445,7 +469,7 @@ blocks:
     name: '""'
     nconnections: '1'
     size: '1024'
-    srate: samp_rate
+    srate: samp_rate_tx
     stemplot: 'True'
     style1: '1'
     style10: '1'
@@ -583,6 +607,67 @@ blocks:
     coordinate: [1000, 445]
     rotation: 0
     state: enabled
+- name: qtgui_waterfall_sink_x_0
+  id: qtgui_waterfall_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '0'
+    color10: '0'
+    color2: '0'
+    color3: '0'
+    color4: '0'
+    color5: '0'
+    color6: '0'
+    color7: '0'
+    color8: '0'
+    color9: '0'
+    comment: ''
+    fc: '0'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    int_max: '10'
+    int_min: '-140'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    type: complex
+    update_time: '0.10'
+    wintype: firdes.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [329, 379]
+    rotation: 0
+    state: true
 - name: rational_resampler_xxx_0
   id: rational_resampler_xxx
   parameters:
@@ -716,7 +801,7 @@ blocks:
     comment: ''
     dev_addr: '"type=b200"'
     dev_args: '""'
-    gain0: '80'
+    gain0: '50'
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -850,7 +935,7 @@ blocks:
     norm_gain9: 'False'
     num_mboards: '1'
     otw: ''
-    samp_rate: samp_rate
+    samp_rate: samp_rate_tx
     sd_spec0: ''
     sd_spec1: ''
     sd_spec2: ''
@@ -876,7 +961,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1152, 139]
+    coordinate: [1155, 135]
     rotation: 0
     state: enabled
 - name: uhd_usrp_source_0
@@ -1288,7 +1373,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [266, 171]
+    coordinate: [265, 170]
     rotation: 0
     state: true
 
@@ -1305,6 +1390,7 @@ connections:
 - [low_pass_filter_0, '0', qtgui_freq_sink_x_0, '0']
 - [rational_resampler_xxx_0, '0', low_pass_filter_0, '0']
 - [uhd_usrp_sink_0_0, token_out, zeromq_req_source_0, token_in]
+- [uhd_usrp_source_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [uhd_usrp_source_0, '0', rational_resampler_xxx_0, '0']
 - [zeromq_req_source_0, '0', blocks_unpack_k_bits_bb_0, '0']
 - [zeromq_req_source_0, '0', digital_gfsk_mod_0, '0']

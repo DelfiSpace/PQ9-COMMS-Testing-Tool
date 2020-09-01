@@ -75,7 +75,9 @@ class top_block(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.sps = sps = 30
+        self.bit_rate_tx = bit_rate_tx = 3600
         self.bit_rate = bit_rate = 9600
+        self.samp_rate_tx = samp_rate_tx = sps*bit_rate_tx
         self.samp_rate = samp_rate = sps*bit_rate
         self.rx_dec = rx_dec = sps/2
 
@@ -108,15 +110,48 @@ class top_block(gr.top_block, Qt.QWidget):
             '',
         )
         self.uhd_usrp_sink_0_0.set_center_freq(uhd.tune_request(145e6, 5e6), 0)
-        self.uhd_usrp_sink_0_0.set_gain(80, 0)
+        self.uhd_usrp_sink_0_0.set_gain(50, 0)
         self.uhd_usrp_sink_0_0.set_antenna('TX/RX', 0)
-        self.uhd_usrp_sink_0_0.set_samp_rate(samp_rate)
+        self.uhd_usrp_sink_0_0.set_samp_rate(samp_rate_tx)
         self.uhd_usrp_sink_0_0.set_time_unknown_pps(uhd.time_spec())
         self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(
                 interpolation=1,
                 decimation=int(rx_dec),
                 taps=None,
                 fractional_bw=None)
+        self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
+            1024, #size
+            firdes.WIN_BLACKMAN_hARRIS, #wintype
+            0, #fc
+            samp_rate, #bw
+            "", #name
+            1 #number of inputs
+        )
+        self.qtgui_waterfall_sink_x_0.set_update_time(0.10)
+        self.qtgui_waterfall_sink_x_0.enable_grid(False)
+        self.qtgui_waterfall_sink_x_0.enable_axis_labels(True)
+
+
+
+        labels = ['', '', '', '', '',
+                  '', '', '', '', '']
+        colors = [0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+                  1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_waterfall_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_waterfall_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_waterfall_sink_x_0.set_color_map(i, colors[i])
+            self.qtgui_waterfall_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self.qtgui_waterfall_sink_x_0.set_intensity_range(-140, 10)
+
+        self._qtgui_waterfall_sink_x_0_win = sip.wrapinstance(self.qtgui_waterfall_sink_x_0.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_waterfall_sink_x_0_win)
         self.qtgui_time_sink_x_0_0_0 = qtgui.time_sink_c(
             1024, #size
             samp_rate, #samp_rate
@@ -169,7 +204,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.top_grid_layout.addWidget(self._qtgui_time_sink_x_0_0_0_win)
         self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
             1024, #size
-            samp_rate, #samp_rate
+            samp_rate_tx, #samp_rate
             "", #name
             1 #number of inputs
         )
@@ -345,6 +380,7 @@ class top_block(gr.top_block, Qt.QWidget):
         self.connect((self.low_pass_filter_0, 0), (self.digital_gmsk_demod_0, 0))
         self.connect((self.low_pass_filter_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.rational_resampler_xxx_0, 0), (self.low_pass_filter_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.rational_resampler_xxx_0, 0))
         self.connect((self.zeromq_req_source_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
         self.connect((self.zeromq_req_source_0, 0), (self.digital_gfsk_mod_0, 0))
@@ -361,6 +397,14 @@ class top_block(gr.top_block, Qt.QWidget):
         self.sps = sps
         self.set_rx_dec(self.sps/2)
         self.set_samp_rate(self.sps*self.bit_rate)
+        self.set_samp_rate_tx(self.sps*self.bit_rate_tx)
+
+    def get_bit_rate_tx(self):
+        return self.bit_rate_tx
+
+    def set_bit_rate_tx(self, bit_rate_tx):
+        self.bit_rate_tx = bit_rate_tx
+        self.set_samp_rate_tx(self.sps*self.bit_rate_tx)
 
     def get_bit_rate(self):
         return self.bit_rate
@@ -370,6 +414,14 @@ class top_block(gr.top_block, Qt.QWidget):
         self.set_samp_rate(self.sps*self.bit_rate)
         self.low_pass_filter_0.set_taps(firdes.low_pass(1, self.samp_rate/self.rx_dec, (1+0.5)*(self.bit_rate/2), 10, firdes.WIN_HAMMING, 6.76))
 
+    def get_samp_rate_tx(self):
+        return self.samp_rate_tx
+
+    def set_samp_rate_tx(self, samp_rate_tx):
+        self.samp_rate_tx = samp_rate_tx
+        self.qtgui_time_sink_x_0_0.set_samp_rate(self.samp_rate_tx)
+        self.uhd_usrp_sink_0_0.set_samp_rate(self.samp_rate_tx)
+
     def get_samp_rate(self):
         return self.samp_rate
 
@@ -378,9 +430,8 @@ class top_block(gr.top_block, Qt.QWidget):
         self.low_pass_filter_0.set_taps(firdes.low_pass(1, self.samp_rate/self.rx_dec, (1+0.5)*(self.bit_rate/2), 10, firdes.WIN_HAMMING, 6.76))
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
-        self.qtgui_time_sink_x_0_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_0_0_0.set_samp_rate(self.samp_rate)
-        self.uhd_usrp_sink_0_0.set_samp_rate(self.samp_rate)
+        self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
     def get_rx_dec(self):
